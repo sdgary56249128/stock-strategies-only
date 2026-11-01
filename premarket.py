@@ -36,6 +36,13 @@ def main():
         print(f"❌ 缺少環境變數: {missing}", file=sys.stderr)
         sys.exit(1)
 
+    # fork 自訂：休市日只發一則通知
+    from stock_strategies.trading_calendar import should_skip
+    if should_skip():
+        print("📅 今天台股休市")
+        send_telegram("📅 今天台股休市，暫停盤前快報與選股")
+        return
+
     # 1. 取得台指期夜盤
     print(f"[{datetime.now()}] 取得台指期夜盤...")
     night = get_night_session()

@@ -53,6 +53,12 @@ def main():
         print(f"❌ 缺少環境變數: {missing}", file=sys.stderr)
         sys.exit(1)
 
+    # fork 自訂：休市日不跑（盤前快報已經發過休市通知）
+    from stock_strategies.trading_calendar import should_skip
+    if should_skip():
+        print("📅 今天台股休市，不執行選股")
+        return
+
     # 1. 讀取 watchlist
     print(f"[{datetime.now()}] 讀取 watchlist...")
     watchlist = read_watchlist()

@@ -1,0 +1,49 @@
+name: Workflow Guard
+
+# fork 自訂：
+# 1. 每月重新啟用所有排程 workflow，避免 repo 60 天沒 commit 被 GitHub 自動停用
+# 2. 選股 / 夜盤快報 / 原作者更新通知失敗時推 Telegram
+
+on:
+  schedule:
+    # 每月 1 日台灣時間 09:00 = UTC 01:00
+    - cron: '0 1 1 * *'
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["V3 Daily Signal", "Premarket Night Session", "Upstream Watch"]
+    types: [completed]
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  keepalive:
+    if: github.event_name != 'workflow_run'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Re-enable scheduled workflows
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          for wf in daily.yml premarket.yml upstream-watch.yml workflow-guard.yml; do
+            gh api -X PUT "repos/$REPO/actions/workflows/$wf/enable" && echo "✅ $wf" || echo "⚠️ $wf"
+          done
+
+  notify-failure:
+    if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'failure'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Telegram
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          NAME: ${{ github.event.workflow_run.name }}
+          URL: ${{ github.event.workflow_run.html_url }}
+        run: |
+          msg=$(printf '❌ 排程執行失敗：%s\n\n%s\n\n👉 回 Claude 說「選股排程失敗了」' "$NAME" "$URL")
+          curl -s -o /dev/null -w '%{http_code}\n' "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -d chat_id="${TELEGRAM_CHAT_ID}" --data-urlencode text="$msg" --data-urlencode disable_web_page_preview=true

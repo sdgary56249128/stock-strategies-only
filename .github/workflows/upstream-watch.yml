@@ -1,0 +1,40 @@
+name: Upstream Watch
+
+on:
+  schedule:
+    # 台灣時間 22:00 = UTC 14:00，每天檢查原作者是否有新 commit
+    - cron: '0 14 * * *'
+  workflow_dispatch:
+
+jobs:
+  check-upstream:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check upstream and notify
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          FORCE: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          git remote add upstream https://github.com/kevin801221/stock-strategies-only.git
+          git fetch -q upstream main
+          total=$(git rev-list --count HEAD..upstream/main)
+          recent=$(git log HEAD..upstream/main --since="25 hours ago" --format='• %s' | head -10)
+          echo "未同步 commit: $total"
+          if [ "$total" -eq 0 ] && [ "$FORCE" != "true" ]; then exit 0; fi
+          if [ -z "$recent" ] && [ "$FORCE" != "true" ]; then exit 0; fi
+          if [ "$total" -eq 0 ]; then
+            msg="🔄 原作者更新檢查：目前沒有新更新"
+          else
+            [ -z "$recent" ] && recent=$(git log HEAD..upstream/main --format='• %s' | head -10)
+            msg=$(printf '🔄 原作者有新更新（未同步 %s 個 commit）\n\n%s\n\n👉 回 Claude 說「同步原作者更新」' "$total" "$recent")
+          fi
+          curl -s -o /dev/null -w '%{http_code}\n' "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -d chat_id="${TELEGRAM_CHAT_ID}" --data-urlencode text="$msg"

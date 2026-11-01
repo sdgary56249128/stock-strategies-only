@@ -285,6 +285,12 @@ def format_messages(
     msg4 = _format_deep_analysis(signals, today)
     messages.append(msg4)
 
+    # fork 自訂：依族群一則訊息（量價解讀併入各檔）
+    if watchlist and CONFIG.get("group_by_sector", True):
+        from .notify_sector import VOLUME_GLOSSARY, format_sector_messages
+        return [messages[0], *format_sector_messages(signals, watchlist),
+                messages[2] + "\n\n" + "\n".join(VOLUME_GLOSSARY)]
+
     return messages
 
 

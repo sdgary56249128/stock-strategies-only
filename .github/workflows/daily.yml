@@ -1,9 +1,10 @@
 name: V3 Daily Signal
 
 on:
-  schedule:
+  # fork 自訂：定時改由 Mac launchd 執行（mac/run.zsh），這裡只保留手動觸發
+  # schedule:
     # Taiwan time 14:30 = UTC 06:30, after market close.
-    - cron: "30 6 * * 1-5"
+  #   - cron: "30 6 * * 1-5"
   workflow_dispatch:
 
 jobs:

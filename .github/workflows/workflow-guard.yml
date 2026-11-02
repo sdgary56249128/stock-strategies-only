@@ -28,7 +28,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
         run: |
-          for wf in daily.yml premarket.yml upstream-watch.yml workflow-guard.yml; do
+          for wf in upstream-watch.yml workflow-guard.yml; do
             gh api -X PUT "repos/$REPO/actions/workflows/$wf/enable" && echo "✅ $wf" || echo "⚠️ $wf"
           done
 

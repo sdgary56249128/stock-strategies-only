@@ -59,6 +59,15 @@ def main():
         print("📅 今天台股休市，不執行選股")
         return
 
+    # fork 自訂：Mac 上快取會保留，原本「前一天的價格也算新鮮」會讓 14:30 用到昨天收盤；
+    # 改成每次都增量抓當天資料，並等 FinMind 更新今日收盤價（mac/run.zsh 設 WAIT_FOR_DATA=1）
+    from stock_strategies.config import CACHE_FRESH_DAYS
+    CACHE_FRESH_DAYS["daily"] = 0
+    if os.environ.get("WAIT_FOR_DATA") == "1":
+        from stock_strategies.trading_calendar import wait_for_today_prices
+        if not wait_for_today_prices():
+            print("⚠️ 等不到今日收盤價，用現有資料執行", file=sys.stderr)
+
     # 1. 讀取 watchlist
     print(f"[{datetime.now()}] 讀取 watchlist...")
     watchlist = read_watchlist()
@@ -126,6 +135,14 @@ def main():
     except Exception as e:
         print(f"⚠️ Performance 追蹤失敗: {e}", file=sys.stderr)
         stats = None
+
+    # fork 自訂：WATCH 也追蹤 T+5/T+10/T+20（WatchPerformance 分頁）
+    try:
+        from stock_strategies.performance_watch import update_watch_performance
+        ws = update_watch_performance(results)
+        print(f"  → WATCH 追蹤：已完成 {ws['count']} 筆")
+    except Exception as e:
+        print(f"⚠️ WATCH 追蹤失敗: {e}", file=sys.stderr)
 
     # 7. 發送 Telegram
     print("發送 Telegram...")

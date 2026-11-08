@@ -9,7 +9,7 @@ REPO=${0:A:h:h}
 JOB=$1
 case $JOB in
   premarket) SCRIPT=premarket.py; NAME="夜盤盤前快報" ;;
-  daily)     SCRIPT=main.py;      NAME="收盤選股" ;;
+  daily)     SCRIPT=main.py;      NAME="收盤選股"; export WAIT_FOR_DATA=1 ;;
   *) echo "用法: zsh mac/run.zsh premarket|daily"; exit 2 ;;
 esac
 LOG=~/Library/Logs/stock-$JOB.log
@@ -26,6 +26,14 @@ done
   uv run python "$SCRIPT"
   code=$?
   echo "── $(date '+%F %T') 結束 exit=$code"
+  # 週五選股跑完接著發週報
+  if [[ $JOB == daily && $code == 0 && $(date +%u) == 5 ]]; then
+    echo "── $(date '+%F %T') 開始 週報"
+    uv run python weekly_report.py
+    code=$?
+    NAME="週報"
+    echo "── $(date '+%F %T') 結束 exit=$code"
+  fi
 } >> "$LOG" 2>&1
 
 if [[ $code != 0 ]]; then

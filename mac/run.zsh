@@ -2,6 +2,7 @@
 # fork 自訂：Mac launchd 排程執行選股（GitHub 免費排程常延遲數小時）
 #   zsh mac/run.zsh premarket   # 08:00 夜盤盤前快報
 #   zsh mac/run.zsh daily       # 14:30 收盤選股
+#   zsh mac/run.zsh chips       # 16:30 盤後籌碼
 # 失敗時推 Telegram；紀錄在 ~/Library/Logs/stock-<job>.log
 
 export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
@@ -10,7 +11,8 @@ JOB=$1
 case $JOB in
   premarket) SCRIPT=premarket.py; NAME="夜盤盤前快報" ;;
   daily)     SCRIPT=main.py;      NAME="收盤選股"; export WAIT_FOR_DATA=1 ;;
-  *) echo "用法: zsh mac/run.zsh premarket|daily"; exit 2 ;;
+  chips)     SCRIPT=chips_report.py; NAME="盤後籌碼" ;;
+  *) echo "用法: zsh mac/run.zsh premarket|daily|chips"; exit 2 ;;
 esac
 LOG=~/Library/Logs/stock-$JOB.log
 cd "$REPO" || exit 1

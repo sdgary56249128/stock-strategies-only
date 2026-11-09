@@ -62,11 +62,17 @@ def format_sector_messages(signals: list[dict], watchlist: list[dict]) -> list[s
         return float(np.mean(vals)) if vals else 0.0
 
     messages = []
+    quiet = []  # 全部 SKIP 的族群合併成一則
     for cat, stocks in sorted(sectors.items(), key=lambda x: avg_chg(x[1]), reverse=True):
         avg = avg_chg(stocks)
         buys = [s for s in stocks if s.get("action") == "BUY"]
         watches = [s for s in stocks if s.get("action") == "WATCH"]
         others = [s for s in stocks if s.get("action") not in _ORDER]
+        if not buys and not watches:
+            quiet.append(f"{_trend_emoji(avg)} *{cat}* 5日{avg:+.1f}%｜" + ", ".join(
+                f"{s['stock_id']}{s['name']}({s.get('signal_score', '—')})" for s in others
+            ))
+            continue
 
         lines = [
             f"{_trend_emoji(avg)} *{cat}* ({len(stocks)}檔) 5日均漲{avg:+.1f}%",
@@ -86,4 +92,7 @@ def format_sector_messages(signals: list[dict], watchlist: list[dict]) -> list[s
                 f"{s['stock_id']}{s['name']}({s.get('signal_score', '—')})" for s in others
             ))
         messages.extend(_split("\n".join(lines).rstrip()))
+    if quiet:
+        head = f"⚪ *其他族群*（{len(quiet)} 個，今日全部 SKIP）"
+        messages.extend(_split("\n\n".join([head, *quiet])))
     return messages

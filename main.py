@@ -105,14 +105,12 @@ def main():
     if night_downgraded:
         print(f"🌙 昨晚夜盤大跌，{night_downgraded} 檔 BUY 已自動降為 WATCH")
 
-    # fork 自訂：籌碼資訊（只顯示、不影響分數）——BUY/WATCH 才抓法人，外資期貨併進夜盤說明
-    from stock_strategies.chips_view import stock_chips, futures_oi, futures_line
+    # fork 自訂：籌碼資訊（只顯示、不影響分數）——BUY/WATCH 才抓法人；14:30 通常只有前一日資料
+    #   外資台指期口數放在 08:00 盤前快報（期交所 15:00 後才公布）
+    from stock_strategies.chips_view import stock_chips
     for r in results:
         if r.get("action") in ("BUY", "WATCH"):
             r["chips"] = stock_chips(str(r["stock_id"]))
-    fut = futures_line(futures_oi())
-    if fut:
-        night_note = f"{night_note}\n{fut}" if night_note else fut
 
     order = {"BUY": 0, "WATCH": 1, "SKIP": 2, "ERROR": 3}
     results.sort(key=lambda x: (order.get(x.get("action"), 4), -x.get("signal_score", 0)))

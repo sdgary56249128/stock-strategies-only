@@ -67,8 +67,8 @@ def chips_line(c: dict | None) -> str | None:
         return None
     st = c["foreign_streak"]
     streak = f"外資連買 {st} 天" if st > 0 else f"外資連賣 {-st} 天" if st < 0 else "外資持平"
-    date = "" if c["date"] == taipei_today().isoformat() else f"（{c['date'][5:].replace('-', '/')}）"
-    return (f"🏦 法人{date}: 外資 {c['foreign']:+,} 投信 {c['trust']:+,} 自營 {c['dealer']:+,} 張"
+    label = "法人" if c["date"] == taipei_today().isoformat() else f"前一日法人（{c['date'][5:].replace('-', '/')}）"
+    return (f"🏦 {label}: 外資 {c['foreign']:+,} 投信 {c['trust']:+,} 自營 {c['dealer']:+,} 張"
             f"｜{streak}｜5日合計 {c['total_5d']:+,}")
 
 
@@ -99,3 +99,19 @@ def futures_line(f: dict | None) -> str | None:
     if f["chg"] is not None:
         chg = f"，較前日{'加多' if f['chg'] > 0 else '加空'} {abs(f['chg']):,} 口" if f["chg"] else "，與前日持平"
     return f"🌐 外資台指期{side} {abs(f['net']):,} 口{chg}（{f['date'][5:].replace('-', '/')}）"
+
+
+def add_premarket_chips(text: str, fetch=stock_chips, fut=None) -> str:
+    """在盤前快報加外資期貨一行，並在每檔昨日 BUY/WATCH 下面加法人一行。"""
+    fut = futures_line(futures_oi()) if fut is None else fut
+    if fut:
+        text = text.replace("\n\n📋", f"\n{fut}\n\n📋", 1)
+    out = []
+    for line in text.split("\n"):
+        out.append(line)
+        parts = line.split()
+        if len(parts) >= 3 and parts[0] in ("🟢", "🟡") and parts[1] in ("BUY", "WATCH"):
+            cl = chips_line(fetch(parts[2]))
+            if cl:
+                out.append("    " + cl.replace("前一日法人", "法人"))
+    return "\n".join(out)

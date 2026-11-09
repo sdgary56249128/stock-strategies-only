@@ -29,3 +29,12 @@ def test_futures_oi_change():
     f = summarize_futures_oi(rows)
     assert f == {"date": "2026-11-06", "net": -99930, "chg": -4279}
     assert futures_line(f) == "🌐 外資台指期淨空 99,930 口，較前日加空 4,279 口（11/06）"
+
+
+def test_add_premarket_chips():
+    from stock_strategies.chips_view import add_premarket_chips
+    text = "🌙 快報\n夜盤\n\n📋 *昨日訊號*\n🟡 WATCH 2330 台積電 73分 · 順風\n↳ 說明"
+    c = {"date": "2026-11-06", "foreign": -1, "trust": 2, "dealer": 0, "foreign_streak": -1, "total_5d": 1}
+    out = add_premarket_chips(text, fetch=lambda sid: c if sid == "2330" else None, fut="🌐 外資")
+    assert "夜盤\n🌐 外資\n\n📋" in out
+    assert "台積電 73分 · 順風\n    🏦 法人（11/06）: 外資 -1" in out

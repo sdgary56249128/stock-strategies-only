@@ -64,7 +64,13 @@ def main():
 
     # 3. 發送 Telegram 盤前快報
     print("發送 Telegram 盤前快報...")
-    send_telegram(format_premarket(night, signals))
+    text = format_premarket(night, signals)
+    # fork 自訂：加上外資台指期淨未平倉（只顯示）
+    from stock_strategies.chips_view import futures_oi, futures_line
+    fut = futures_line(futures_oi())
+    if fut:
+        text = text.replace("\n\n📋", f"\n{fut}\n\n📋", 1)
+    send_telegram(text)
     print("✅ 完成")
 
 

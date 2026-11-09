@@ -6,6 +6,7 @@
 
 import numpy as np
 
+from .chips_view import chips_line
 from .notify import _explain_why, _format_stock_detail, _trend_emoji
 
 TG_LIMIT = 3900  # Telegram 單則上限 4096，留緩衝
@@ -83,6 +84,8 @@ def format_sector_messages(signals: list[dict], watchlist: list[dict]) -> list[s
             tag = "🟢 BUY" if s["action"] == "BUY" else "🟡 WATCH"
             lines.append(tag)
             lines.extend(_format_stock_detail(s))
+            if chips_line(s.get("chips")):
+                lines.append(chips_line(s["chips"]))
             why = _explain_why(s)
             lines.append(f"💡 為何買: {why}" if s["action"] == "BUY" else f"❓ 差在: {why}")
             lines.extend(_volume_lines(s))

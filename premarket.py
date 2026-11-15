@@ -68,6 +68,11 @@ def main():
     # fork 自訂：外資台指期淨未平倉＋昨日 BUY/WATCH 的法人買賣超（只顯示）
     from stock_strategies.chips_view import add_premarket_chips
     text = add_premarket_chips(text)
+    # fork 自訂：昨晚美股摘要（只顯示）
+    from stock_strategies.us_market import us_block
+    us = us_block()
+    if us:
+        text = text.replace("\n\n📋", f"\n\n{us}\n\n📋", 1)
     send_telegram(text)
     print("✅ 完成")
 

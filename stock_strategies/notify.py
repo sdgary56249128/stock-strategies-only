@@ -412,7 +412,13 @@ def format_premarket(night: dict | None, signals: list[dict]) -> str:
         buys = [s for s in batch if str(s["action"]).upper() == "BUY"]
         watches = [s for s in batch if str(s["action"]).upper() == "WATCH"]
         lines.append(f"📋 *昨日訊號 × 夜盤對照* ({latest_day})")
-        for s in (buys + watches)[:12]:
+        # fork 自訂：BUY/WATCH 全部列出、各自依分數高到低（原本只列前 12 檔）
+        def _score(s):
+            try:
+                return -float(s.get("signal_score") or 0)
+            except (TypeError, ValueError):
+                return 0
+        for s in sorted(buys, key=_score) + sorted(watches, key=_score):
             act = str(s["action"]).upper()
             dot = "🟢" if act == "BUY" else "🟡"
             lines.append(

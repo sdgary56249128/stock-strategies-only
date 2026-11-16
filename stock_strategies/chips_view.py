@@ -114,4 +114,5 @@ def add_premarket_chips(text: str, fetch=stock_chips, fut=None) -> str:
             cl = chips_line(fetch(parts[2]))
             if cl:
                 out.append("    " + cl.replace("前一日法人", "法人"))
+            out.append("")  # 每檔之間空一行，比較好讀
     return "\n".join(out)

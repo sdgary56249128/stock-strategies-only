@@ -38,3 +38,4 @@ def test_add_premarket_chips():
     out = add_premarket_chips(text, fetch=lambda sid: c if sid == "2330" else None, fut="🌐 外資")
     assert "夜盤\n🌐 外資\n\n📋" in out
     assert "台積電 73分 · 順風\n    🏦 法人（11/06）: 外資 -1" in out
+    assert "5日合計 +1\n\n↳ 說明" in out

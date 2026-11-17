@@ -46,3 +46,13 @@ def test_force_run(monkeypatch):
     monkeypatch.setenv("FORCE_RUN", "1")
     monkeypatch.setattr(tc, "taipei_today", lambda: date(2026, 11, 1))
     assert tc.should_skip() is False
+
+
+def test_dedupe_daily_keeps_latest_row():
+    import pandas as pd
+    from stock_strategies.cache import _dedupe_daily
+    df = pd.DataFrame({"date": pd.to_datetime(["2026-11-13", "2026-11-13", "2026-11-16"]),
+                       "Trading_Volume": [100, 120, 90]})
+    out = _dedupe_daily("TaiwanStockPrice", df)
+    assert out["Trading_Volume"].tolist() == [120, 90]
+    assert len(_dedupe_daily("TaiwanStockInstitutionalInvestorsBuySell", df)) == 3

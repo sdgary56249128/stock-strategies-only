@@ -177,6 +177,17 @@ def _api_to_df(payload: dict) -> pd.DataFrame:
     return df
 
 
+# fork 自訂：一天一列的資料集。14:30 抓到的當日成交量是盤中值，之後 FinMind 會更新成最終值，
+# 增量重抓時同一天會出現「欄位不同」的兩列，全欄位去重去不掉 → 依 date 只留最後（最新）一列。
+_ONE_ROW_PER_DATE = {"TaiwanStockPrice", "TaiwanStockPER"}
+
+
+def _dedupe_daily(dataset: str, df: pd.DataFrame) -> pd.DataFrame:
+    if dataset in _ONE_ROW_PER_DATE and "date" in df.columns and len(df):
+        df = df.drop_duplicates(subset=["date"], keep="last").reset_index(drop=True)
+    return df
+
+
 def fetch_finmind_cached(
     dataset: str,
     data_id: str,
@@ -219,12 +230,14 @@ def fetch_finmind_cached(
             # 全欄位去重：移除增量 overlap 的完全重複列。不可用 subset=["date"] 去重——
             # long-format（財報多 type、法人多 name）同一 date 有多列，會被誤砍成一列（根因A）。
             df = df.drop_duplicates()
+            df = _dedupe_daily(dataset, df)
         else:
             df = fresh
         df = df.reset_index(drop=True)
         if len(df):
             _write_cache(dataset, data_id, df)
 
+    df = _dedupe_daily(dataset, df)
     # 切片
     if "date" in df.columns and len(df):
         df = df[df["date"] >= pd.to_datetime(start_date)]

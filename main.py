@@ -151,6 +151,14 @@ def main():
     except Exception as e:
         print(f"⚠️ WATCH 追蹤失敗: {e}", file=sys.stderr)
 
+    # fork 自訂：BUY 的 ATR×3 移動停損平行追蹤（ATRPerformance 分頁，跟現行 +10%/-8% 對照）
+    try:
+        from stock_strategies.performance_atr import update_atr_performance
+        a = update_atr_performance()
+        print(f"  → ATR×3 追蹤：持有中 {a['open']} 筆，已出場 {a['closed']} 筆")
+    except Exception as e:
+        print(f"⚠️ ATR 追蹤失敗: {e}", file=sys.stderr)
+
     # 7. 發送 Telegram
     print("發送 Telegram...")
     for msg in format_messages(results, watchlist, market=market, night_note=night_note):

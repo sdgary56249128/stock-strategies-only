@@ -32,7 +32,8 @@ def _md(s: str) -> str:
     return str(s).replace("*", "").replace("_", "").replace("`", "").replace("[", "")
 
 
-def build_report(signals: list[dict], watchlist: list[dict], perf: list[dict], today) -> str | None:
+def build_report(signals: list[dict], watchlist: list[dict], perf: list[dict], today,
+                 atr: dict | None = None) -> str | None:
     monday = today - timedelta(days=today.weekday())
     week = [s for s in signals if monday.isoformat() <= str(s.get("date", "")) <= today.isoformat()]
     if not week:
@@ -84,6 +85,14 @@ def build_report(signals: list[dict], watchlist: list[dict], perf: list[dict], t
     lines.append(f"觸及停利 {target} 次｜觸及停損 {stop} 次")
     if not t5:
         lines.append("_T+5 數據要累積滿 5 個交易日才會出現_")
+    if atr and atr.get("total"):
+        lines.append("")
+        lines.append("🧪 *BUY 的 ATR×3 出場平行追蹤*（尚未採用）")
+        lines.append(f"共 {atr['total']} 筆｜持有中 {atr['open']}｜已出場 {atr['closed']}")
+        if atr.get("avg_open") is not None:
+            lines.append(f"持有中平均 {atr['avg_open']:+.2f}%")
+        if atr.get("avg_closed") is not None:
+            lines.append(f"已出場：勝率 {atr['winrate']}%，平均 {atr['avg_closed']:+.2f}%（已扣成本）")
     lines.append("")
     lines.append("_僅供參考，投資決策請自行判斷_")
     return "\n".join(lines)
@@ -91,7 +100,12 @@ def build_report(signals: list[dict], watchlist: list[dict], perf: list[dict], t
 
 def main():
     signals = get_gsheet().worksheet("Signals").get_all_records()
-    report = build_report(signals, read_watchlist(), read_watch_performance(), taipei_today())
+    try:
+        from stock_strategies.performance_atr import read_atr_performance, stats
+        atr = stats(read_atr_performance())
+    except Exception:
+        atr = None
+    report = build_report(signals, read_watchlist(), read_watch_performance(), taipei_today(), atr)
     if report is None:
         print("本週沒有選股紀錄，不發週報")
         return

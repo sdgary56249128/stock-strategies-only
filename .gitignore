@@ -27,3 +27,6 @@ web/node_modules/
 web/.next/
 web/tsconfig.tsbuildinfo
 web/.env*.local
+
+# fork 自訂：回測資料不進 git
+research/data/

@@ -19,3 +19,10 @@
 | [relative-strength](strategies/relative-strength.md) | 相對強度排名 | 動能效果 | 動能 | 待回測 | — |
 | [high-52w-breakout](strategies/high-52w-breakout.md) | 52 週新高突破 | George & Hwang | 順勢／突破 | 待回測 | — |
 | [pullback-rsi](strategies/pullback-rsi.md) | 多頭拉回買進（RSI2） | Larry Connors | 均值回歸 | 待回測 | — |
+| [margin-retreat](strategies/margin-retreat.md) | 融資減少、股價上漲 | 台股常見 | 籌碼 | 待回測 | — |
+| [foreign-holding-up](strategies/foreign-holding-up.md) | 外資持股比例上升 | 台股常見 | 籌碼 | 待回測 | — |
+| [value-yield](strategies/value-yield.md) | 低本益比＋高殖利率 | 價值投資 | 價值 | 待回測 | — |
+| [ma-squeeze-breakout](strategies/ma-squeeze-breakout.md) | 均線糾結後突破 | 台股常見 | 型態 | 待回測 | — |
+| [seasonality](strategies/seasonality.md) | 季節性（作帳、元月、除息） | 日曆效應 | 時間 | 待回測 | — |
+| [market-timing-plus](strategies/market-timing-plus.md) | 大盤擇時加強版 | 現行濾鏡延伸 | 濾鏡 | 待回測 | — |
+| [position-sizing](strategies/position-sizing.md) | 資金控管 | 風險管理 | 風險管理 | 待回測 | — |

@@ -28,6 +28,11 @@ done
   uv run python "$SCRIPT"
   code=$?
   echo "── $(date '+%F %T') 結束 exit=$code"
+  # 選股跑完接著發微台指模擬交易（紙上交易）；失敗不影響選股結果
+  if [[ $JOB == daily && $code == 0 ]]; then
+    echo "── $(date '+%F %T') 開始 微台指模擬"
+    uv run python index_trend_report.py || echo "⚠️ 微台指模擬失敗"
+  fi
   # 週五選股跑完接著發週報
   if [[ $JOB == daily && $code == 0 && $(date +%u) == 5 ]]; then
     echo "── $(date '+%F %T') 開始 週報"

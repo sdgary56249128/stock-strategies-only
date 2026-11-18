@@ -27,3 +27,4 @@
 | [market-timing-plus](strategies/market-timing-plus.md) | 大盤擇時加強版 | 現行濾鏡延伸 | 濾鏡 | 待回測 | — |
 | [position-sizing](strategies/position-sizing.md) | 資金控管 | 風險管理 | 風險管理 | 待回測 | — |
 | [market-prediction-v1](strategies/market-prediction-v1.md) | 大盤方向預測模型 v1 | 使用者提議 | 機器學習 | 無效 | 跳空可預測（AUC 0.85）但無法交易；盤中與 5 日無優勢 |
+| [index-trend-futures](strategies/index-trend-futures.md) | 大盤趨勢跟隨（微台指） | 使用者提議 | 大盤擇時 | 有效（初步） | 站上季線做多：26 年回撤 -66%→-23%，年化 5.8%→9.3% |

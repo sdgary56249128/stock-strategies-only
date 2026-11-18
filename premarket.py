@@ -73,6 +73,11 @@ def main():
     us = us_block()
     if us:
         text = text.replace("\n\n📋", f"\n\n{us}\n\n📋", 1)
+    # fork 自訂：市場情緒（VIX、P/C ratio、融資、法人合計，只顯示）
+    from stock_strategies.sentiment import sentiment_block
+    senti = sentiment_block()
+    if senti:
+        text = text.replace("\n\n📋", f"\n\n{senti}\n\n📋", 1)
     # fork 自訂：全部列出後可能超過 Telegram 單則上限，自動拆成多則
     from stock_strategies.notify_sector import _split
     for part in _split(text):

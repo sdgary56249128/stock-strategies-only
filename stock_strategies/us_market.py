@@ -15,7 +15,7 @@ FINMIND_URL = "https://api.finmindtrade.com/api/v4/data"
 YAHOO_URL = "https://query1.finance.yahoo.com/v8/finance/chart/{}"
 
 INDICES = [("^SOX", "費半"), ("^IXIC", "那斯達克"), ("^GSPC", "標普")]
-STOCKS = ["NVDA", "AMD", "AVGO", "MU", "AAPL"]
+STOCKS = ["NVDA", "AMD", "AVGO", "MU", "AAPL", "TSLA", "SPCX"]
 
 
 def _finmind(symbol: str) -> list[tuple[str, float]]:
